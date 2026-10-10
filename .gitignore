@@ -1,0 +1,7 @@
+# Cấu hình chạy thử cục bộ của Claude Code
+.claude/
+
+# Hệ điều hành
+Thumbs.db
+Desktop.ini
+.DS_Store

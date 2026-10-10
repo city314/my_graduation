@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Lễ tốt nghiệp của Công Tuấn</title>
+  <meta name="description" content="Thiệp mời dự Lễ tốt nghiệp của Công Tuấn – 10:00–12:00, 17/10/2026 tại Sảnh A, Trường Đại học Tôn Đức Thắng.">
+  <meta name="theme-color" content="#fff3f1">
+
+  <!-- Ảnh xem trước khi gửi link qua Zalo / Messenger.
+       Sau khi deploy, đổi og:image thành URL tuyệt đối, ví dụ https://ten-mien-cua-ban/assets/images/og-image.jpg -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="🎓 Mời bạn dự Lễ tốt nghiệp của Công Tuấn!">
+  <meta property="og:description" content="10:00–12:00 · Thứ Bảy 17/10/2026 · Sảnh A, ĐH Tôn Đức Thắng">
+  <meta property="og:image" content="assets/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <link rel="icon" type="image/png" href="assets/images/favicon.png">
+  <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/images/chibi.webp">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Tải lại trang = vào mới: không nhớ vị trí cuộn, bỏ #invite... trên URL (giữ ?to=Tên) -->
+  <script>
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+    window.addEventListener("load", function () { window.scrollTo({ top: 0, behavior: "instant" }); });
+    // Bấm "Quay lại" từ trang khác (Google Maps, Lịch...) → trình duyệt khôi phục trang cũ; tải lại cho mới
+    window.addEventListener("pageshow", function (e) { if (e.persisted) location.reload(); });
+  </script>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="hero__deco" aria-hidden="true">
+      <svg class="cap cap--1" viewBox="0 0 64 48"><use href="#i-cap"/></svg>
+      <svg class="cap cap--2" viewBox="0 0 64 48"><use href="#i-cap"/></svg>
+      <svg class="cap cap--3" viewBox="0 0 64 48"><use href="#i-cap"/></svg>
+      <span class="star star--1">✦</span>
+      <span class="star star--2">✦</span>
+      <span class="star star--3">✦</span>
+    </div>
+
+    <p class="hero__to" id="greeting">Gửi bạn thân mến,</p>
+
+    <div class="stage">
+      <div class="bubble" id="bubble" role="status" aria-live="polite">Hello! 👋</div>
+
+      <!-- Bọc 2 lớp: .chibi lo nhảy/nhún, .chibi__body lo lắc lư.
+           Khi có ảnh tách cánh tay, thêm <img class="chibi__arm"> vào trong .chibi__body. -->
+      <button class="chibi is-entering" id="chibi" type="button" aria-label="Bấm vào Công Tuấn">
+        <span class="chibi__body">
+          <img src="assets/images/chibi.webp" width="618" height="1100" alt="Chibi Công Tuấn mặc áo tốt nghiệp">
+        </span>
+      </button>
+      <span class="shadow" aria-hidden="true"></span>
+    </div>
+
+    <h1 class="hero__title">
+      <span class="hero__kicker">Tuấn tốt nghiệp rồi!</span>
+      Mời bạn đến chung vui nha
+    </h1>
+
+    <a class="btn btn--primary" href="#invite">Xem thiệp mời ↓</a>
+  </header>
+
+  <main>
+    <!-- ============ THIỆP MỜI ============ -->
+    <section class="section" id="invite">
+      <div class="envelope" id="envelope">
+        <button class="envelope__btn" id="openEnvelope" type="button">
+          <span class="envelope__flap" aria-hidden="true"><svg viewBox="0 0 300 120" preserveAspectRatio="none"><path d="M0 0H300L150 120Z"/></svg></span>
+          <span class="envelope__peek" aria-hidden="true">🎓</span>
+          <span class="envelope__front" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="none"><path d="M0 0L150 112L300 0V200H0Z"/></svg></span>
+          <span class="envelope__seal" aria-hidden="true">CT</span>
+          <span class="envelope__label">Chạm để mở thiệp ✉️</span>
+        </button>
+      </div>
+
+      <article class="card invite" id="inviteCard" hidden>
+        <p class="invite__eyebrow">Trân trọng kính mời</p>
+        <p class="invite__guest" id="guestName">Bạn</p>
+        <p class="invite__lead">đến dự buổi</p>
+        <h2 class="invite__title">Lễ Tốt Nghiệp</h2>
+        <p class="invite__of">của <strong>Lê Công Tuấn</strong></p>
+
+        <dl class="facts">
+          <div class="fact">
+            <dt><span class="fact__icon" aria-hidden="true">📅</span>Ngày</dt>
+            <dd>Thứ Bảy, 17/10/2026</dd>
+          </div>
+          <div class="fact">
+            <dt><span class="fact__icon" aria-hidden="true">⏰</span>Giờ</dt>
+            <dd>10:00 – 12:00 sáng</dd>
+          </div>
+          <div class="fact">
+            <dt><span class="fact__icon" aria-hidden="true">📍</span>Địa điểm</dt>
+            <dd>Sảnh A, Trường Đại học Tôn Đức Thắng<br>
+              <small>19 Nguyễn Hữu Thọ, Phường Tân Hưng, TP. Hồ Chí Minh</small></dd>
+          </div>
+        </dl>
+
+        <div class="invite__actions">
+          <a class="btn btn--primary" href="https://maps.app.goo.gl/b4fe246c4KnW9pDF6" target="_blank" rel="noopener">Chỉ đường</a>
+          <a class="btn btn--ghost" id="calendarLink" target="_blank" rel="noopener">Lưu vào lịch</a>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ ĐẾM NGƯỢC ============ -->
+    <section class="section" aria-labelledby="countdown-title">
+      <h2 class="section__title" id="countdown-title">Còn bao lâu nữa?</h2>
+      <div class="countdown" id="countdown">
+        <div class="countdown__cell"><span data-unit="days">--</span><small>ngày</small></div>
+        <div class="countdown__cell"><span data-unit="hours">--</span><small>giờ</small></div>
+        <div class="countdown__cell"><span data-unit="minutes">--</span><small>phút</small></div>
+        <div class="countdown__cell"><span data-unit="seconds">--</span><small>giây</small></div>
+      </div>
+      <p class="countdown__note" id="countdownNote" hidden></p>
+    </section>
+
+    <!-- ============ GỬI XE ============ -->
+    <section class="section" id="parking" aria-labelledby="parking-title">
+      <h2 class="section__title" id="parking-title">Đi tới trường &amp; gửi xe</h2>
+
+      <button class="map-thumb" id="openMap" type="button" aria-label="Phóng to sơ đồ gửi xe">
+        <img src="assets/images/parking.webp" width="1449" height="955" loading="lazy"
+             alt="Sơ đồ khuôn viên ĐH Tôn Đức Thắng: lối vào cổng 7, cổng 9, vị trí gửi xe máy và ô tô">
+        <span class="map-thumb__hint">🔍 Chạm để phóng to</span>
+      </button>
+
+      <ul class="tiles">
+        <li class="tile">
+          <span class="tile__icon" aria-hidden="true">🛵</span>
+          <h3>Xe máy</h3>
+          <p>Vào <b>cổng 7</b> hoặc <b>cổng 9</b> để đến bãi gửi xe máy của trường nha.</p>
+        </li>
+        <li class="tile">
+          <span class="tile__icon" aria-hidden="true">🚗</span>
+          <h3>Ô tô</h3>
+          <p>Vào <b>cổng 9</b>, có làn đường và bãi đỗ dành cho ô tô.</p>
+        </li>
+        <li class="tile">
+          <span class="tile__icon" aria-hidden="true">🚕</span>
+          <h3>Xe công nghệ</h3>
+          <p>Đến <b>cổng 1, 2, 3, 4 hoặc 5</b> đều được. Ưu tiên <b>cổng 1 hoặc 2</b> để đỡ đi bộ nha.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============ LƯU Ý ============ -->
+    <section class="section" aria-labelledby="notes-title">
+      <h2 class="section__title" id="notes-title">Lưu ý khi tham dự</h2>
+      <ol class="card notes">
+        <li><span class="notes__num">1</span>
+          <p>Mang theo <b>CCCD</b> để xuất trình khi vào cổng nha. Nếu là sinh viên trường, bạn dùng <b>thẻ sinh viên</b> nhé.</p></li>
+        <li><span class="notes__num">2</span>
+          <p>Nếu bảo vệ hỏi, bạn đọc mã số sinh viên của Công Tuấn:
+            <button class="copy" type="button" data-copy="52200033">52200033 <span>📋</span></button></p></li>
+        <li><span class="notes__num">3</span>
+          <p>Cần hỗ trợ thì gọi trực tiếp cho Công Tuấn nhen.</p></li>
+        <li><span class="notes__num">4</span>
+          <p>Số điện thoại của Công Tuấn:
+            <a class="phone" id="phoneLink" href="#">đang cập nhật</a></p></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <img src="assets/images/favicon.png" width="48" height="48" alt="" aria-hidden="true">
+    <p>Cảm ơn bạn đã đồng hành cùng Tuấn suốt những năm qua 💛</p>
+    <p class="footer__see">Hẹn gặp bạn ngày <b>17/10</b> nha!</p>
+    <p class="footer__credit">
+      🎵 Nhạc nền: “Carefree” – Kevin MacLeod (<a href="https://incompetech.com" target="_blank" rel="noopener">incompetech.com</a>)<br>
+      Giấy phép <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">Creative Commons: By Attribution 4.0</a>
+    </p>
+  </footer>
+
+  <!-- Sơ đồ phóng to -->
+  <dialog class="lightbox" id="mapDialog" aria-label="Sơ đồ gửi xe">
+    <button class="lightbox__close" type="button" data-close aria-label="Đóng">✕</button>
+    <div class="lightbox__scroll">
+      <img src="assets/images/parking.webp" width="1449" height="955" alt="Sơ đồ gửi xe ĐH Tôn Đức Thắng (phóng to)">
+    </div>
+  </dialog>
+
+  <!-- Nhạc nền: “Carefree” – Kevin MacLeod (CC BY 4.0), file ở assets/audio/bg-music.mp3. Không có file thì nút nhạc tự ẩn. -->
+  <audio id="bgm" src="assets/audio/bg-music.mp3" preload="metadata" loop></audio>
+  <button class="music" id="musicBtn" type="button" aria-label="Bật nhạc nền" aria-pressed="false" hidden>
+    <span class="music__icon" aria-hidden="true">🎵</span>
+  </button>
+
+  <!-- Chibi nhỏ ở góc phải, hiện ra khi đã lướt qua chibi lớn -->
+  <div class="dock" id="dock" hidden>
+    <div class="bubble bubble--dock" id="dockBubble" role="status" aria-live="polite"></div>
+    <div class="dock__runner">
+      <button class="dock__chibi" id="dockChibi" type="button" aria-label="Bấm vào Công Tuấn để nghe dặn dò">
+        <img src="assets/images/chibi.webp" width="618" height="1100" alt="">
+      </button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Icon mũ tốt nghiệp dùng chung -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-cap" viewBox="0 0 64 48">
+      <path d="M32 4 2 17l30 13 30-13z" fill="#1f1f1f" stroke="#2a1414" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M14 23v11c0 5 8 9 18 9s18-4 18-9V23l-18 8z" fill="#2b2b2b" stroke="#2a1414" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M55 20v14" stroke="#ff5d73" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="55" cy="36" r="3.5" fill="#ff5d73"/>
+    </symbol>
+  </svg>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>
