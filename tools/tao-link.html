@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tạo link mời</title>
+  <!-- Công cụ chạy trên máy: mở file này bằng trình duyệt. Không nằm trong public/ nên không bị đưa lên web. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff3f1;
+      --bg-2: #ffdcd6;
+      --surface: #ffffff;
+      --ink: #3d2a3a;
+      --muted: #7d6676;
+      --accent: #ff5d73;
+      --accent-dark: #d93d58;
+      --ok: #2f9e6b;
+      --line: 2px;
+      --radius: 18px;
+      --pop: 3px 3px 0 var(--ink);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 500 16px/1.5 "Quicksand", system-ui, sans-serif;
+    }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-family: "Mali", "Quicksand", sans-serif; font-size: 1.8rem; margin: 0 0 4px; }
+    h2 { font-size: 1.05rem; margin: 0 0 8px; }
+    .lead { color: var(--muted); margin: 0 0 24px; }
+    .card {
+      background: var(--surface);
+      border: var(--line) solid var(--ink);
+      border-radius: var(--radius);
+      box-shadow: var(--pop);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+    @media (min-width: 720px) { .grid { grid-template-columns: 1fr 1fr; } }
+    .grid .card { margin-bottom: 0; }
+    label { display: block; font-weight: 700; margin-bottom: 6px; }
+    .hint { color: var(--muted); font-size: .88rem; margin: 6px 0 0; }
+    textarea, input[type="url"] {
+      width: 100%;
+      font: inherit;
+      color: inherit;
+      background: var(--bg);
+      border: var(--line) solid var(--ink);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    textarea { min-height: 200px; resize: vertical; }
+    textarea:focus, input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+    code { background: var(--bg-2); padding: 1px 6px; border-radius: 6px; }
+
+    button, .btn {
+      font: 700 .9rem/1 "Quicksand", sans-serif;
+      color: var(--ink);
+      background: var(--surface);
+      border: var(--line) solid var(--ink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 2px 2px 0 var(--ink);
+      transition: transform .1s, box-shadow .1s;
+    }
+    button:hover, .btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
+    button:active, .btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+    button.primary { background: var(--accent); color: #fff; }
+    button.done { background: var(--ok); color: #fff; }
+
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .toolbar .count { margin-right: auto; font-weight: 700; }
+    .progress { color: var(--muted); font-weight: 600; }
+
+    ol { list-style: none; margin: 0; padding: 0; }
+    li.guest {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-top: 1px dashed var(--bg-2);
+    }
+    li.guest:first-child { border-top: 0; }
+    li.guest.sent .name { text-decoration: line-through; color: var(--muted); }
+    .sent-box { width: 22px; height: 22px; accent-color: var(--ok); grid-row: span 2; }
+    .name { font-weight: 700; }
+    .link {
+      grid-column: 2;
+      font-size: .82rem;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+    .actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .empty { color: var(--muted); text-align: center; padding: 24px 0; margin: 0; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 24px;
+      transform: translate(-50%, 20px);
+      background: var(--ink); color: #fff;
+      padding: 10px 18px; border-radius: 999px;
+      font-weight: 700;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>🎓 Tạo link mời</h1>
+  <p class="lead">Dán danh sách khách, mỗi người nhận một link riêng có tên của họ. Danh sách chỉ lưu trên máy này.</p>
+
+  <div class="grid">
+    <section class="card">
+      <label for="names">Danh sách khách (mỗi dòng một tên)</label>
+      <textarea id="names" placeholder="Minh&#10;Chị Thảo&#10;Thầy Hùng" spellcheck="false"></textarea>
+      <p class="hint">Gõ đúng như muốn hiện trên thiệp, ví dụ <code>Chị Thảo</code>. Tên trùng sẽ được gộp lại.</p>
+    </section>
+
+    <section class="card">
+      <label for="message">Tin nhắn mẫu</label>
+      <textarea id="message" spellcheck="false"></textarea>
+      <p class="hint"><code>{ten}</code> là tên khách, <code>{link}</code> là link riêng. Để link ở cuối tin để Zalo hiện ảnh xem trước.</p>
+      <label for="base" style="margin-top:12px">Địa chỉ trang</label>
+      <input id="base" type="url" spellcheck="false">
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:20px">
+    <div class="toolbar">
+      <span class="count" id="count">0 khách</span>
+      <span class="progress" id="progress"></span>
+      <button type="button" id="copyAll" class="primary">Copy tất cả link</button>
+    </div>
+    <ol id="list"></ol>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const DEFAULT_BASE = "https://congtuan-totnghiep.biyeo126.workers.dev/";
+  const DEFAULT_MESSAGE =
+    "Chào {ten}! 🎓\n" +
+    "Tuấn sắp tốt nghiệp rồi nè, mời {ten} đến chung vui lúc 10:00 thứ Bảy 17/10/2026 " +
+    "tại Sảnh A, ĐH Tôn Đức Thắng nha 💛\n" +
+    "Thiệp mời của {ten} ở đây:\n{link}";
+
+  const $ = (s) => document.querySelector(s);
+  const namesEl = $("#names");
+  const messageEl = $("#message");
+  const baseEl = $("#base");
+  const listEl = $("#list");
+
+  /* ---------- Lưu trên máy (lỗi thì bỏ qua) ---------- */
+  const store = {
+    get(key, fallback) {
+      try { const v = localStorage.getItem("taolink:" + key); return v === null ? fallback : JSON.parse(v); }
+      catch { return fallback; }
+    },
+    set(key, value) {
+      try { localStorage.setItem("taolink:" + key, JSON.stringify(value)); } catch {}
+    },
+  };
+
+  namesEl.value = store.get("names", "");
+  messageEl.value = store.get("message", DEFAULT_MESSAGE);
+  baseEl.value = store.get("base", DEFAULT_BASE);
+  let sent = new Set(store.get("sent", []));
+
+  /* ---------- Tạo link ---------- */
+  // Giống trang thiệp: bỏ khoảng trắng thừa, tối đa 40 ký tự
+  function parseNames() {
+    const seen = new Set();
+    return namesEl.value
+      .split("\n")
+      .map((n) => n.replace(/\s+/g, " ").trim().slice(0, 40))
+      .filter((n) => n && !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase()));
+  }
+
+  function linkFor(name) {
+    const base = (baseEl.value.trim() || DEFAULT_BASE).replace(/[?#].*$/, "").replace(/\/?$/, "/");
+    return `${base}?to=${encodeURIComponent(name)}`;
+  }
+
+  function messageFor(name) {
+    return messageEl.value.replaceAll("{ten}", name).replaceAll("{link}", linkFor(name));
+  }
+
+  /* ---------- Hiển thị ---------- */
+  function render() {
+    const names = parseNames();
+    $("#count").textContent = `${names.length} khách`;
+    const done = names.filter((n) => sent.has(n)).length;
+    $("#progress").textContent = names.length ? `Đã gửi ${done}/${names.length}` : "";
+    $("#copyAll").disabled = !names.length;
+
+    listEl.replaceChildren();
+    if (!names.length) {
+      const p = document.createElement("p");
+      p.className = "empty";
+      p.textContent = "Dán tên vào ô bên trên để tạo link.";
+      listEl.append(p);
+      return;
+    }
+
+    for (const name of names) {
+      const li = document.createElement("li");
+      li.className = "guest" + (sent.has(name) ? " sent" : "");
+
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.className = "sent-box";
+      box.checked = sent.has(name);
+      box.title = "Đánh dấu đã gửi";
+      box.setAttribute("aria-label", `Đã gửi cho ${name}`);
+      box.addEventListener("change", () => {
+        box.checked ? sent.add(name) : sent.delete(name);
+        store.set("sent", [...sent]);
+        render();
+      });
+
+      const nameEl = document.createElement("span");
+      nameEl.className = "name";
+      nameEl.textContent = name;
+
+      const linkEl = document.createElement("span");
+      linkEl.className = "link";
+      linkEl.textContent = linkFor(name);
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+      actions.append(
+        button("Copy tin nhắn", () => copy(messageFor(name), `Đã copy tin nhắn cho ${name}`)),
+        button("Copy link", () => copy(linkFor(name), `Đã copy link của ${name}`)),
+      );
+      const open = document.createElement("a");
+      open.className = "btn";
+      open.href = linkFor(name);
+      open.target = "_blank";
+      open.rel = "noopener";
+      open.textContent = "Mở thử";
+      actions.append(open);
+
+      li.append(box, nameEl, linkEl, actions);
+      listEl.append(li);
+    }
+  }
+
+  function button(text, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = text;
+    b.addEventListener("click", () => {
+      onClick();
+      b.classList.add("done");
+      setTimeout(() => b.classList.remove("done"), 1200);
+    });
+    return b;
+  }
+
+  /* ---------- Copy ---------- */
+  let toastTimer;
+  function toast(text) {
+    const t = $("#toast");
+    t.textContent = text;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
+  }
+
+  async function copy(text, okText) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Dự phòng khi trình duyệt chặn clipboard API
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.append(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    toast(okText);
+  }
+
+  $("#copyAll").addEventListener("click", () => {
+    const names = parseNames();
+    copy(names.map((n) => `${n}: ${linkFor(n)}`).join("\n"), `Đã copy ${names.length} link`);
+  });
+
+  /* ---------- Gõ tới đâu cập nhật tới đó ---------- */
+  namesEl.addEventListener("input", () => { store.set("names", namesEl.value); render(); });
+  messageEl.addEventListener("input", () => store.set("message", messageEl.value));
+  baseEl.addEventListener("input", () => { store.set("base", baseEl.value); render(); });
+
+  render();
+</script>
+</body>
+</html>
