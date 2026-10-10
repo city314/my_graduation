@@ -11,10 +11,13 @@ const CONFIG = {
   eventPlace:
     "Sảnh A, Trường Đại học Tôn Đức Thắng, 19 Nguyễn Hữu Thọ, Phường Tân Hưng, TP. Hồ Chí Minh",
 
+  // {ban} {tui} (viết hoa đầu câu: {Ban} {Tui}) tự đổi theo người nhận:
+  // chị/em, em/anh, thầy/em, chú/cháu... (bảng xưng hô ở js/xung-ho.js)
+
   // Bong bóng gợi ý hiện thường trực sau khi chibi nói xong
-  hint: "Ấn vào tui để nghe dặn dò nè 👆",
+  hint: "Ấn vào {tui} để nghe dặn dò nè 👆",
   // Câu chibi nói khi vừa chạy xuống góc phải
-  dockGreeting: "Tui theo bạn xuống đây nè! 🏃",
+  dockGreeting: "{Tui} theo {ban} xuống đây nè! 🏃",
   // Chibi ở góc: đang cuộn thì giấu gợi ý, ngừng cuộn 1,5 giây thì hiện lại (và giữ luôn)
   dockHintAfterScrollMs: 1500,
 
@@ -25,13 +28,13 @@ const CONFIG = {
   reminders: [
     "Lễ bắt đầu 10h sáng thứ Bảy 17/10 nha, đừng trễ nhé! ⏰",
     "Nhớ mang CCCD theo nha! Sinh viên trường thì mang thẻ sinh viên 🪪",
-    "Bảo vệ hỏi thì đọc MSSV của tui: 52200033 nha!",
+    "Bảo vệ hỏi thì đọc MSSV của {tui}: 52200033 nha!",
     "Đi xe máy thì vào cổng 7 hoặc cổng 9 nha 🛵",
     "Đi ô tô thì vào cổng 9, có bãi đỗ riêng 🚗",
     "Đi xe công nghệ thì xuống cổng 1 hoặc 2 cho đỡ đi bộ nha 🚕",
     "Gặp nhau ở Sảnh A nhé!",
-    "Lạc đường thì gọi tui liền nhen 📞",
-    "Có bạn đến là tui vui lắm luôn 💛",
+    "Lạc đường thì gọi {tui} liền nhen 📞",
+    "Có {ban} đến là {tui} vui lắm luôn 💛",
   ],
 };
 
@@ -40,15 +43,18 @@ const reduceMotion = window.matchMedia(
   "(prefers-reduced-motion: reduce)",
 ).matches;
 
-/* ---------- Lời chào theo tên: ?to=Minh ---------- */
-const guest = (new URLSearchParams(location.search).get("to") || "")
-  .trim()
-  .slice(0, 40);
-if (guest) {
-  $("#greeting").textContent = `Gửi ${guest} thân mến,`;
-  $("#guestName").textContent = guest;
-  document.title = `${guest} ơi, mời bạn dự Lễ tốt nghiệp của Công Tuấn!`;
-}
+/* ---------- Lời chào theo tên + xưng hô: ?to=Chị Thảo ---------- */
+// Worker đã chèn sẵn vào HTML trên server; làm lại ở đây cho lúc chạy thử trên máy
+const guest = XungHo.resolve(new URLSearchParams(location.search));
+$("#greeting").textContent = `Gửi ${guest.inText || guest.you} thân mến,`;
+$("#guestName").textContent = guest.name || XungHo.cap(guest.you);
+document.querySelectorAll("[data-xh]").forEach((el) => {
+  el.textContent = XungHo.fill(`{${el.dataset.xh}}`, guest);
+});
+if (guest.name) document.title = XungHo.title(guest);
+CONFIG.hint = XungHo.fill(CONFIG.hint, guest);
+CONFIG.dockGreeting = XungHo.fill(CONFIG.dockGreeting, guest);
+CONFIG.reminders = CONFIG.reminders.map((t) => XungHo.fill(t, guest));
 
 /* ---------- Pháo giấy ---------- */
 const COLORS = [
@@ -160,7 +166,7 @@ chibi.addEventListener("animationend", function onEnter(e) {
   chibi.removeEventListener("animationend", onEnter);
   chibi.classList.remove("is-entering");
   chibi.classList.add("is-waving", "is-idle");
-  heroTalker.say(guest ? `Hello ${guest}! 👋` : "Hello bạn! 👋");
+  heroTalker.say(`Hello ${guest.inText || guest.you}! 👋`);
   burst({ origin: { x: 0.25, y: 0.5 }, angle: 60 });
   burst({ origin: { x: 0.75, y: 0.5 }, angle: 120 });
 });

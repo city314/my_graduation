@@ -93,7 +93,17 @@
     li.guest:first-child { border-top: 0; }
     li.guest.sent .name { text-decoration: line-through; color: var(--muted); }
     .sent-box { width: 22px; height: 22px; accent-color: var(--ok); grid-row: span 2; }
+    .head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
     .name { font-weight: 700; }
+    .role {
+      font: 600 .85rem "Quicksand", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      border: var(--line) solid var(--ink);
+      border-radius: 999px;
+      padding: 3px 8px;
+    }
+    .role.picked { background: var(--bg-2); }
     .link {
       grid-column: 2;
       font-size: .82rem;
@@ -124,13 +134,16 @@
     <section class="card">
       <label for="names">Danh sách khách (mỗi dòng một tên)</label>
       <textarea id="names" placeholder="Minh&#10;Chị Thảo&#10;Thầy Hùng" spellcheck="false"></textarea>
-      <p class="hint">Gõ đúng như muốn hiện trên thiệp, ví dụ <code>Chị Thảo</code>. Tên trùng sẽ được gộp lại.</p>
+      <p class="hint">Gõ đúng như muốn hiện trên thiệp, ví dụ <code>Chị Thảo</code>, <code>Em Na</code>, <code>Thầy Hùng</code>.
+        Chữ đầu là anh/chị/em/thầy/cô/chú/bác... thì xưng hô tự đổi theo; đoán sai (như bạn tên <code>Anh Thư</code>) thì chọn lại ở danh sách bên dưới.</p>
     </section>
 
     <section class="card">
       <label for="message">Tin nhắn mẫu</label>
       <textarea id="message" spellcheck="false"></textarea>
-      <p class="hint"><code>{ten}</code> là tên khách, <code>{link}</code> là link riêng. Để link ở cuối tin để Zalo hiện ảnh xem trước.</p>
+      <p class="hint"><code>{ten}</code> tên khách · <code>{link}</code> link riêng ·
+        <code>{ban}</code> cách gọi khách (bạn/chị/em...) · <code>{tui}</code> Tuấn tự xưng (tui/em/anh/cháu...).
+        Viết hoa đầu câu: <code>{Ban}</code> <code>{Tui}</code>. Để link ở cuối tin để Zalo hiện ảnh xem trước.</p>
       <label for="base" style="margin-top:12px">Địa chỉ trang</label>
       <input id="base" type="url" spellcheck="false">
     </section>
@@ -148,13 +161,21 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- Bảng xưng hô dùng chung với trang thiệp -->
+<script src="../public/js/xung-ho.js"></script>
 <script>
+  if (!window.XungHo) {
+    document.querySelector("main").innerHTML =
+      "<h1>😵 Thiếu file xưng hô</h1><p class='lead'>Không tải được <code>public/js/xung-ho.js</code>. " +
+      "Hãy mở file này ngay trong thư mục <code>tools/</code> của project, đừng chép ra chỗ khác.</p>";
+    throw new Error("Thiếu public/js/xung-ho.js");
+  }
   const DEFAULT_BASE = "https://congtuan-totnghiep.biyeo126.workers.dev/";
   const DEFAULT_MESSAGE =
     "Chào {ten}! 🎓\n" +
-    "Tuấn sắp tốt nghiệp rồi nè, mời {ten} đến chung vui lúc 10:00 thứ Bảy 17/10/2026 " +
+    "{Tui} sắp tốt nghiệp rồi nè, mời {ban} đến chung vui lúc 10:00 thứ Bảy 17/10/2026 " +
     "tại Sảnh A, ĐH Tôn Đức Thắng nha 💛\n" +
-    "Thiệp mời của {ten} ở đây:\n{link}";
+    "Thiệp mời của {ban} ở đây:\n{link}";
 
   const $ = (s) => document.querySelector(s);
   const namesEl = $("#names");
@@ -177,6 +198,8 @@
   messageEl.value = store.get("message", DEFAULT_MESSAGE);
   baseEl.value = store.get("base", DEFAULT_BASE);
   let sent = new Set(store.get("sent", []));
+  // Xưng hô chọn tay cho từng tên (chỉ lưu khi khác với kiểu tự đoán)
+  let picked = store.get("xh", {});
 
   /* ---------- Tạo link ---------- */
   // Giống trang thiệp: bỏ khoảng trắng thừa, tối đa 40 ký tự
@@ -184,17 +207,46 @@
     const seen = new Set();
     return namesEl.value
       .split("\n")
-      .map((n) => n.replace(/\s+/g, " ").trim().slice(0, 40))
+      .map(XungHo.cleanName)
       .filter((n) => n && !seen.has(n.toLowerCase()) && seen.add(n.toLowerCase()));
+  }
+
+  const roleOf = (name) => picked[name] || XungHo.detect(name);
+
+  // Chỉ thêm &xh=... khi xưng hô khác với kiểu trang tự đoán từ tên
+  function paramsFor(name) {
+    const p = new URLSearchParams({ to: name });
+    if (roleOf(name) !== XungHo.detect(name)) p.set("xh", roleOf(name));
+    return p;
   }
 
   function linkFor(name) {
     const base = (baseEl.value.trim() || DEFAULT_BASE).replace(/[?#].*$/, "").replace(/\/?$/, "/");
-    return `${base}?to=${encodeURIComponent(name)}`;
+    return `${base}?${paramsFor(name).toString().replace(/\+/g, "%20")}`;
   }
 
   function messageFor(name) {
-    return messageEl.value.replaceAll("{ten}", name).replaceAll("{link}", linkFor(name));
+    const r = XungHo.resolve(paramsFor(name));
+    return XungHo.fill(messageEl.value, r)
+      .replaceAll("{ten}", r.inText)
+      .replaceAll("{link}", linkFor(name));
+  }
+
+  function roleSelect(name) {
+    const sel = document.createElement("select");
+    sel.className = "role" + (picked[name] ? " picked" : "");
+    sel.setAttribute("aria-label", `Xưng hô với ${name}`);
+    for (const [key, r] of Object.entries(XungHo.ROLES)) {
+      sel.add(new Option(`${r.label}: gọi "${r.you}", xưng "${r.me}"`, key));
+    }
+    sel.value = roleOf(name);
+    sel.addEventListener("change", () => {
+      if (sel.value === XungHo.detect(name)) delete picked[name];
+      else picked[name] = sel.value;
+      store.set("xh", picked);
+      render();
+    });
+    return sel;
   }
 
   /* ---------- Hiển thị ---------- */
@@ -230,9 +282,12 @@
         render();
       });
 
+      const head = document.createElement("div");
+      head.className = "head";
       const nameEl = document.createElement("span");
       nameEl.className = "name";
       nameEl.textContent = name;
+      head.append(nameEl, roleSelect(name));
 
       const linkEl = document.createElement("span");
       linkEl.className = "link";
@@ -252,7 +307,7 @@
       open.textContent = "Mở thử";
       actions.append(open);
 
-      li.append(box, nameEl, linkEl, actions);
+      li.append(box, head, linkEl, actions);
       listEl.append(li);
     }
   }
